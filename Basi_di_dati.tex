@@ -75,11 +75,15 @@ La selezione è una operazione unaria. Seleziona le tuple di una relazione che s
 producendo un sottoinsieme delle stesse, (ossia seleziona le righe della tabella che rispettano la condizione data, ricordiamo che con tuple si intendono le righe della tabella mentre con attributi le singole colonne).\\
 Lo schema della relazione risultato è lo stesso di quella di origine ed il predicato è costituito dal nome di un attributo, da un operatore, e da un altro argomento che può essere un attributo o un valore
 costante.\\
-$$\sigma_{\text{predicato}}(relazione)$$
+$$\sigma_{\text{predicato}}(relazione)$$\\
+La cardinalità di questa operazione è la seguente:\\
+$$ 0 \leq |\sigma_{\text{F}}(R)| \leq |R|$$\\
 
 \subsection{Proiezione $\Pi$}
 La proiezione è una operazione unaria. Data una relazione, la sua proiezione su un dato insieme di attributi è costituita dalla tabella generata dagli attributi specificati, contenente tutte le tuple della tabella di partenza, (ossia estrae tutte le colonne corrispondenti alla lista di attributi specificati).\\
 $$\Pi_{\text{lista attributi}}(relazione)$$\\
+La cardinalità di questa operazione è la seguente:\\
+$$min(|R|, 1) \leq \Pi_{\text{y}}(R) \leq |R|$$\\
 
 \subsection{Ridenominazione $\rho$}
 A volte in preparazione all’esecuzione di una interrogazione o in seguito ad una sua esecuzione si ha bisogno di rinominare gli attributi di una relazione. A tal fine l’operatore di ridenominazione che permette di ottenere una nuova tabella con i nuovi nomi per gli attributi modificati e che ha le stesse tuple della tabella originale.\\
@@ -88,24 +92,31 @@ $$\rho_{\text{nuovo nome $\leftarrow$ vecchio nome}}(relazione)$$\\
 \subsection{Unione $\cup$}
 l’unione fra due tabelle è rappresentata da una tabella costituita dall’unione “matematica” delle due tabelle, dove quindi sono presenti le tuple della prima tabella e quelle della seconda. Affinché l’unione abbia senso, è necessario che:
 \begin{itemize}
-    \item le due tabelle abbiano lo stesso numero di attributi;e
+    \item le due tabelle abbiano lo stesso numero di attributi;
     \item i tipi degli attributi corrispondenti siano uguali;
 \end{itemize}
 Se il numero degli attributi delle due relazioni (tabelle) non è uguale, si genera un errore.\\
+La cardinalità di questa operazione è la seguente:\\
+$$max(|R1|, |R2|) \leq |R1 \cup R2| \leq |R1| + |R2|$$\\
 
 \subsection{Differenza -}
 La differenza fra due tabelle A e B è una tabella che contiene le tuple che sono presenti in A ma non in
 B. Come nel caso dedll'unione, questa operazione può essere eseguita solo se le relazioni hanno lo stesso grado (numero di colonne) e gli attributi sono compatibili.\\
+La cardinalità di questa operazione è la seguente:\\
+$$0 \leq |R1 - R2| \leq |R1|$$\\
 
-\newpage
 \subsection{Prodotto Cartesiano $\times$}
 Il prodotto cartesiano fra due tabelle è una tabella con schema la somma degli schemi, se due attributi
 sono uguali questi sono ripetuti le tuple della tabella sono il risultato del prodotto cartesiano dei suoi elementi, ossia da tutte le coppie possibili composte dagli elementi appartenenti alle due relazioni.\\
-$$R1\times R2$$
+$$R1\times R2$$\\
+La cardinalità di questa operazione è la seguente (ricordiamo che se il Join è completo il limite inferiore diventa $max(|R1|,|R2|)$):\\
+$$|R1 \times R2| = |R1| \cdot |R2|$$\\
 
 \subsection{Intersezione $\cap$}
 Il risultato dell'operazione di intersezione tra due relazioni è una relazione contenente le tuple che appartengono ad entrambe le relazioni, anche in questo caso valgono le stesse condizioni di unione e differenza per la validità dell'operazione.\\
-$$R1 \cap R2$$
+$$R1 \cap R2$$\\
+La cardinalità di questa operazione è la seguente:\\
+$$ 0 \leq |R1 \cap R2| \leq min(|R1|, |R2|)$$\\
 
 \section{Join}
 \subsection{Introduzione}
@@ -120,8 +131,8 @@ Esistono diverse varianti di tale operatore comunque riconducibili l’una con l
 Il Join naturale è un operatore binario che correla dati in relazioni diverse sulla base dei valori uguali in attributi con lo stesso nome. La relazione risultante è una tabella che ha come attributi l’unione degli attributi delle tabelle iniziali e contiene solamente le tuple che hanno valori uguali negli attributi a comune.\\
 Il Join può essere ottenuto tramite un prodotto cartesiano e una selezione imponendo l’uguaglianza su tutti gli attributi in comune:\\
 $$\sigma_{\text{A.attributo\_comune = B.attributo\_comune}}(A \times B)$$\\
-Il Join si dice completo se ogni tupla della relazione A contribuisce a generare almeno una tupla della relazione risultato, altrimenti si dice incompleto e le tuple che non contribuiscono al risultato si chiamano \textbf{dangling tuples}.
-
+Il Join si dice completo se ogni tupla della relazione A contribuisce a generare almeno una tupla della relazione risultato, altrimenti si dice incompleto e le tuple che non contribuiscono al risultato si chiamano \textbf{dangling tuples}.\\
+$$0 \leq |R1 \bowtie R2| \leq |R1| \cdot |R2|$$\\
 \newpage
 \subsection{Theta Join ed Equi Join}
 Nel caso del Theta Join, l'operatore della condizione di selezione eseguita dopo il prodotto cartesiano viene esplicitato. Nel caso in cui OP (ossia l'operatore nella selezione) sia composta solo da uguaglianze, l’operazione prende il nome di Equi-join.\\
