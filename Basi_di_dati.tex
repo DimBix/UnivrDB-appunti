@@ -132,6 +132,7 @@ Il Join naturale è un operatore binario che correla dati in relazioni diverse s
 Il Join può essere ottenuto tramite un prodotto cartesiano e una selezione imponendo l’uguaglianza su tutti gli attributi in comune:\\
 $$\sigma_{\text{A.attributo\_comune = B.attributo\_comune}}(A \times B)$$\\
 Il Join si dice completo se ogni tupla della relazione A contribuisce a generare almeno una tupla della relazione risultato, altrimenti si dice incompleto e le tuple che non contribuiscono al risultato si chiamano \textbf{dangling tuples}.\\
+La cardinalità del Join Naturale è la seguente:\\
 $$0 \leq |R1 \bowtie R2| \leq |R1| \cdot |R2|$$\\
 \newpage
 \subsection{Theta Join ed Equi Join}
