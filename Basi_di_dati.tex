@@ -17,16 +17,18 @@
 \newtheorem{definizione}{Definizione}
 
 % Definire lo stile per le sezioni e sottosezioni
-\titleformat{\section}[block]{\normalfont\fontsize{2em}{2em}\bfseries\filcenter}{\thesection}{10pt}{}
-\titleformat{\subsection}[block]{\normalfont\fontsize{1.35em}{1em}\bfseries}{\thesubsection}{10pt}{}
+\titleformat{\section}[block]
+  {\normalfont\fontsize{20}{24}\bfseries\filcenter} % Font size and style
+  {\thesection}{10pt}{} % Section number format
+
+\titleformat{\subsection}[block]
+  {\normalfont\fontsize{15}{18}\bfseries} % Font size and style
+  {\thesubsection}{10pt}{} % Subsection number format
 
 % Rimuovere l'indentazione a sinistra dei titoli delle sezioni e sottosezioni
 \titlespacing*{\section}{0pt}{*2}{*1.5}
 \titlespacing*{\subsection}{0pt}{*1.5}{*1}
 
-% Cambia il comportamento del counter nei caption
-\counterwithin{figure}{section} % Figures will be numbered as 1.1, 1.2, etc.
-\captionsetup[figure]{labelformat=simple, labelsep=colon, name=Figura}
 
 % Gap righe
 \renewcommand{\arraystretch}{1.6}
@@ -68,7 +70,7 @@ Nella classificazione in base alla derivabilità si distiguono 6 operatori di ba
     \item Jion
 \end{itemize}
 \newpage
-\subsection{Selezione $\sigma$ }
+\subsection{Selezione $\sigma$}
 La selezione è una operazione unaria. Seleziona le tuple di una relazione che soddisfano un predicato
 producendo un sottoinsieme delle stesse, (ossia seleziona le righe della tabella che rispettano la condizione data, ricordiamo che con tuple si intendono le righe della tabella mentre con attributi le singole colonne).\\
 Lo schema della relazione risultato è lo stesso di quella di origine ed il predicato è costituito dal nome di un attributo, da un operatore, e da un altro argomento che può essere un attributo o un valore
@@ -81,7 +83,7 @@ $$\Pi_{\text{lista attributi}}(relazione)$$\\
 
 \subsection{Ridenominazione $\rho$}
 A volte in preparazione all’esecuzione di una interrogazione o in seguito ad una sua esecuzione si ha bisogno di rinominare gli attributi di una relazione. A tal fine l’operatore di ridenominazione che permette di ottenere una nuova tabella con i nuovi nomi per gli attributi modificati e che ha le stesse tuple della tabella originale.\\
-$$\rho_{\text{nuovo nome <- vecchio nome}}(relazione)$$\\
+$$\rho_{\text{nuovo nome $\leftarrow$ vecchio nome}}(relazione)$$\\
 
 \subsection{Unione $\cup$}
 l’unione fra due tabelle è rappresentata da una tabella costituita dall’unione “matematica” delle due tabelle, dove quindi sono presenti le tuple della prima tabella e quelle della seconda. Affinché l’unione abbia senso, è necessario che:
@@ -103,13 +105,13 @@ $$R1\times R2$$
 
 \subsection{Intersezione $\cap$}
 Il risultato dell'operazione di intersezione tra due relazioni è una relazione contenente le tuple che appartengono ad entrambe le relazioni, anche in questo caso valgono le stesse condizioni di unione e differenza per la validità dell'operazione.\\
-$$R1 \cap R2$$\\
+$$R1 \cap R2$$
 
 \section{Join}
 \subsection{Introduzione}
 E’ l’operatore più caratteristico dell’algebra relazionale, in quanto è quello che permette di correlare dati contenuti in relazioni diverse confrontando i valori comuni contenuti in esse.\\
 Esistono diverse varianti di tale operatore comunque riconducibili l’una con l’altra:
-\begin{itemize}
+\begin{itemize} 
     \item Join Naturale
     \item Join Esterni
     \item Theta Join ed Equi Join\\
