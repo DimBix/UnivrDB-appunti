@@ -134,6 +134,8 @@ $$\sigma_{\text{A.attributo\_comune = B.attributo\_comune}}(A \times B)$$\\
 Il Join si dice completo se ogni tupla della relazione A contribuisce a generare almeno una tupla della relazione risultato, altrimenti si dice incompleto e le tuple che non contribuiscono al risultato si chiamano \textbf{dangling tuples}.\\
 La cardinalità del Join Naturale è la seguente:\\
 $$0 \leq |R1 \bowtie R2| \leq |R1| \cdot |R2|$$\\
+Ricordarsi inoltre che lo schema della relazione risultato è il seguente (X è lo schema della relazione R):\\
+$$X3 = X1 \cup X2$$\\
 \newpage
 \subsection{Theta Join ed Equi Join}
 Nel caso del Theta Join, l'operatore della condizione di selezione eseguita dopo il prodotto cartesiano viene esplicitato. Nel caso in cui OP (ossia l'operatore nella selezione) sia composta solo da uguaglianze, l’operazione prende il nome di Equi-join.\\
