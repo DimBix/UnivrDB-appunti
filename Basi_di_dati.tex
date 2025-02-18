@@ -4,11 +4,13 @@
 \usepackage{graphicx}
 \graphicspath{ {./img/} }
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{tabularx}
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{titlesec}
 \usepackage{enumitem}
+\usepackage{multicol}
 \usepackage{amsthm}
 \renewcommand*\contentsname{Indice}
 
@@ -154,37 +156,122 @@ La cardinalità del Join Naturale è, in generale:
 \[0 \leq |R1 \bowtie R2| \leq |R1| \cdot |R2|\]
 Se il join \`e completo la cardinalit\`a diventa:
 \[ max(|R1|, |R2|) \leq |R1 \bowtie R2| \leq |R1| \cdot |R2| \]
+Se $X_1 \cap X_2$ \`e una superchiave per $R2$:
+\[ 0 \le |R1 \bowtie R2| \leq |R1| \]
+Il caso pi\`u classico che ricounduce a questa situazione \`e quando si fa l'uguaglianza tra una \emph{chiave} e una \emph{chiave esportata}, ovvero abbiamo esportato la chiave di $R2$ su $R1$. Se prendo una tupla di $R1$ che ha tra i suoi attributi una \emph{superchiave} di $R2$, si avr\`a al massimo una tupla di $R2$ che va in combinazione con la tupla di partenza di $R1$, perci\`o, \emph{al massimo} la cardinalit\`a sar\`a quella di $R1$. Se $X_1 \cap X_2$ \`e una superchiave di $R2$ ed esiste un \emph{vincolo di integrit\`a referenziale} tra $X_1 \cap X_2$, o una parte di $R1$, e $R2$: $|R1 \bowtie R2| = |R1|$.
 
-\newpage
-\subsection{Theta Join ed Equi Join}
-Nel caso del Theta Join, l'operatore della condizione di selezione eseguita dopo il prodotto cartesiano viene esplicitato. Nel caso in cui OP (ossia l'operatore nella selezione) sia composta solo da uguaglianze, l’operazione prende il nome di Equi-join.\\
-$$ A \bowtie_{\text{$\theta$}}B$$\\
-Ricordiamo che è possibile riscrivere il Join tramite il prodotto cartesiano e la selezione:\\
-$$\sigma_{\text{A.attributo\_comune $\theta$ B.attributo\_comune}}(A \times B)$$\\
-Dove $\theta$ è l'operatore.\\
-Solitamenta questi due operatori vengono usati più del Natural Join dato che non è obbligatoria l'uguaglianza del nome degli attributi e sono più modellabili.\\
+\subsection{Theta join ed equi-join}
+Nel theta join il predicato di join viene esplicitato, \`e indipendente dallo schema.
+Date le relazioni $R1$ e $R2$, rispettivamente di schema $X_1$ e $X_2$, la \textbf{precondizione} al theta join \`e che gli schemi di $R1$ e $R2$ devono essere \emph{disgiunti}: $X_1 \cap X_2 = \varnothing $.
+\[ R1 \bowtie_{\theta} R2 = \sigma_{\theta}(R1 \bowtie R2) \]
+Dove il join naturale all'interno della selezione funge da \emph{prodotto cartesiano} e $\theta$ \`e un predicato conforme alla sintassi prevista per l'operatore di selezione.
+\subsubsection{Esempio}
+\texttt{DOCENTE(\underline{CF}, Nome, Cognome)\\
+CORSO(\underline{Nome}, Docente)\\
+}
+Si richiede di produrre l'elenco di tutti i corsi riportando: nome del corso e cognome del docente.
+\[ \Pi_{\text{NomeCorso, Cognome}}(\rho_{\text{Nome $\to$ NomeCorso}}(CORSO) {\Large \bowtie \atop \text{\tiny{CF = Docente}}} DOCENTE) \]
+Graficamente:
+\begin{center}
+\includegraphics[scale=0.5]{theta_join_example}
+\end{center}
 
-\newpage
+\subsubsection{Equi-join}
+Il theta join si dice \emph{equi-join} se la condizione $\theta$ \`e una congiunzione di uguaglianze:
+\[ R1 {\bowtie \atop A_1 = B_1 \wedge \dots \wedge A_n = B_n} R2 \]
+
+Si noti che \textbf{non esiste} un operatore misto che applica la logica del join naturale per gli attributi comuni e aggiunge la condizione specificata esplicitamente attraverso il predicato $\theta$.
+
+\subsubsection{Propriet\`a dell'equi-join}
+
+Date due relazioni $R1$ e $R2$ di schema $X_1$ e $X_2$, con $X_1 \cap X_2 = \{ C_1, \dots, C_m\}$ con $m > 0$, vale la seguente equivalenza:
+\[ R1 \bowtie R2 = \Pi_{X_1 \cup X_2} \left(R1 {\bowtie \atop C_1=C_1' \wedge \dots \wedge C_m=C_m'} \rho_{C_1,\dots,C_m \to C_1', \dots, C_m'}(R2)\right) \]
+In questo caso si hanno due relazioni che hanno attributi comuni ($\{ C_1, \dots, C_m\}$) e quindi si devono ridenominare gli attributi di una delle due relaizoni, nell'esempio quelli di $R2$. A questo punto gli schemi sono disgiunti e la condizione del theta-join sar\`a una congiunzione di uguaglianze: $C_1=C_1' \wedge \dots \wedge C_m=C_m'$. Gli attributi che si ottengono nel risultato del theta-join sono la somma degli attributi di $R1$ e di $R2$, cosa che non avviene nel join naturale. Per questo motivo si proietta su $\Pi_{X_1\cup X_2}$, in questo modo l'unione considera gli attributi di tutte e due le relazioni ma esclude i $C_1', \dots, C_m'$ generati nell'espressione.
+
 \section{Ottimizzazione}
-\subsection{Valori NULL}
-E’ opportuno estendere l’algebra relazionale affinché possa manipolare anche relazioni che contengono valori nulli (NULL). Le operazioni che devono essere raffinate per gestire relazioni che contengono valori nulli sono in particolare \textbf{selezione} e \textbf{Join Naturale}.\\
-Le altre operazioni riportano semplicemente nelle tuple del risultato il valore nullo presente sulle tuple di input.\\\\
-Nel caso della \textbf{selezione} abbiamo che $\sigma_\text{A $\theta$ B}$ risulta essere falsa (quindi non selezionare quella determinata tupla) se uno dei due attributi A o B è NULL (anche se messo a confronto con una costante). Nel caso invece ci sia un'operazione atomica del tipo "A is NULL" allora risulterà vera se e solo se A è NULL.\\\\
-Anche il \textbf{Join Naturale} si comporta in modo simile, infatti se anche solo uno degli attributi comuni risulta essere NULL allora il Join sarà falso su quella tupla. Si ricorda che "NULL = NULL" è sempre falso.\\
+\subsection{Valori nulli}
+E’ opportuno estendere l’algebra relazionale affinché possa manipolare anche relazioni che contengono \emph{valori nulli} (NULL). Le operazioni che devono essere raffinate per gestire relazioni che contengono valori nulli sono in particolare \textbf{selezione} e \textbf{join naturale}.\\
+Le altre operazioni riportano semplicemente nelle tuple del risultato il valore nullo presente sulle tuple di input.
+
+\subsubsection{Selezione}
+Nel caso della \textbf{selezione} abbiamo che la selezione applicata a:
+\begin{itemize}
+\item $A \theta B$ risulta essere falsa (quindi non seleziona quella determinata tupla) se uno dei due attributi A o B è NULL.
+\item $A \theta const$ risulta essere falsa se l'attributo $A$ \`e NULL.
+\end{itemize}
+Inoltre, si aggiungono le seguenti condizioni atomiche:
+\begin{itemize}
+\item \texttt{A IS NULL}: \`e una condizione atomica che viene valutata sulla tupla $t$. \`E \textbf{vero} se $t[A]$ \emph{contiene} il valore NULL, altrimenti \`e \textbf{falso}. 
+\item \texttt{A IS NOT NULL}: \`e una condizione atomica che viene valutata sulla tupla $t$. \`E \textbf{vero} se $t[A]$ \emph{\underline{non} contiene} il valore NULL, altrimenti \`e \textbf{falso}.
+\end{itemize}
+
+\subsubsection{Join naturale}
+La condizione di uguaglianza sugli attributi comuni alle due relazioni \`e \textbf{falsa} sulle tuple $t_1$ e $t_2$ se almeno uno degli attributi comuni di $t_1$ o di $t_2$ \`e NULL. Inoltre, il confronto particolare $NULL = NULL$ \`e \textbf{sempre valutato FALSO}.
 
 \subsection{Ottimizzatore}
-Ogni espressione DML ricevuta dal DBMS viene sottoposta ad un processo di elaborazione, tra cui, anche uno di ottimizzazione. L’ottimizzatore genera un’espressione equivalente all’interrogazione di input e di costo inferiore (il costo viene valutato in termini di dimensione dei risultati intermedi).\\
-L’ottimizzatore esegue trasformazioni di equivalenza allo scopo di riddurre la dimensione dei risultati intermedi.\\
-Le principali sono quattro e sono le seguenti:
+Ogni espressione DML\footnote{Solitamente specificata in linguaggio dichiarativo} ricevuta dal DBMS viene sottoposta ad un processo di elaborazione, tra cui, anche uno di ottimizzazione. L’ottimizzatore genera un’espressione equivalente all’interrogazione di input e di costo inferiore. quest'ultimo viene valutato in termini di \textbf{dimensione dei risultati intermedi}.
+L’ottimizzatore esegue \textbf{trasformazioni di equivalenza} allo scopo di riddurre la dimensione dei risultati intermedi.
+
+\subsubsection{Equivalenza tra espressioni algebriche}
+
+\paragraph{Equivalenza dipendente dallo schema.} Dato uno schema $R$:
+$E_1 \equiv E_2$ se $E_1(r) = E_2(r)$ per ogni istanza di $r$ di schema $R$.\\
+Esempio:
+\[ \Pi_{AB}(R_1) \bowtie \Pi_{AC}(R_2) \equiv_R \Pi_{ABC}(R_1 \bowtie R_2) \]
+Con $R=\{R_1(A, B, D), R_2(A, C, E)\}$.
+
+La condizione generale che lo schema deve soddisfare \`e che l'\textbf{unico attributo comune tra $R_1$ e $R_2$ sia $A$}.
+
+\paragraph{Equivalenza assoluta.} \`E indipendente dallo schema.
+
+$E_1 \equiv E_2$ se $E_1 \equiv_R E_2$ per ogni schema $R$ compatibile con $E_1$ ed $E_2$.\\
+Esempio:
+\[ \Pi_{AB}(\sigma_{A>0}(R_1)) \equiv \sigma_{A>0}(\Pi_{AB}(R1))\]
+
+
+\subsubsection{Trasformazioni di equivalenza}
+Le principali trasformazioni sono quattro. Sia $E$ un'espressione di schema $X$, si definiscono le seguenti trasformazioni di equivalenza:
 \begin{itemize}
-    \item \textbf{Atomizzazione delle selezioni:} una congiunzione di selezioni può essere sostituita da
-una sequenza di selezioni atomiche;
-$$\sigma_\text{F1 and F2}(E) \equiv \sigma_\text{F1}(\sigma_\text{F2}(E))$$
-    \item \textbf{Idempotenza delle proiezioni:} una proiezione può essere trasformata in una sequenza
-di proiezioni che eliminano i vari attributi in varie fasi.\\
-$$\Pi_\text{A}(E) \equiv \Pi_\text{A}(\Pi_\text{A,B}(E))$$
-    \item \textbf{Anticipazione della selezione rispetto al Join:} questa espressione vale solo se F conivolge SOLO gli attributi della sottoespressione B.\\
-$$\sigma_\text{F}(A \bowtie B) \equiv A \bowtie(\sigma_\text{F}(B))$$
+    \item \textbf{Atomizzazione delle selezioni:} una congiunzione di selezioni può essere sostituita da una sequenza di selezioni atomiche.
+\[ \sigma_\text{F1 $\wedge$ F2}(E) \equiv \sigma_\text{F1}(\sigma_\text{F2}(E))\] \`E propedeutica ad altre trasformazioni. Non ottimizza se non \`e seguita da altre trasformazioni. \\
+Esempio:\\
+\texttt{
+TRENO(\underline{NumTreno}, OrarioPart, Cat, Dest, OrarioArr)\\
+FERMATA(\underline{NumTreno, Stazione}, Orario)
+}
+
+\[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR' $\wedge$ Stazione='Vicenza'}}(TRENO \bowtie FERMATA) \]
+\[ \Large \Rightarrow \]
+\[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR'}}(\sigma_{\text{Stazione='Vicenza'}}(TRENO \bowtie FERMATA))) \]
+\begin{multicols}{2}[Graficamente:]
+
+\begin{center}\includegraphics[scale=0.5]{tree_example_transform}\end{center}
+\begin{center}\includegraphics[scale=0.5]{tree_example_atomizz_sel}\end{center}
+\end{multicols}
+    \item \textbf{Idempotenza delle proiezioni:} una proiezione può essere trasformata in una sequenza di proiezioni che eliminano i vari attributi in varie fasi.
+\[ \Pi_\text{A}(E) \equiv \Pi_\text{A}(\Pi_\text{A,B}(E)) \text{ dove }B \subseteq X \]
+\`E propedeutica ad altre trasformazioni. Non ottimizza se non \`e seguita da altre trasformazioni. 
+\end{itemize}
+\newpage
+Siano $E_1$ ed $E_2$ espressioni di schema $X_1$ e $X_2$, si definiscono le seguenti trasformazioni di equivalenza:
+\begin{itemize}
+    \item \textbf{Anticipazione della selezione rispetto al join:} questa espressione vale solo se $F$ conivolge \textbf{solo} gli attributi di $E_2$.
+\[ \sigma_{F}(E_1 \bowtie E_2) \equiv_R E_1 \bowtie \sigma_{F}(E_2) \]
+Esempio:\\
+\texttt{
+TRENO(\underline{NumTreno}, OrarioPart, Cat, Dest, OrarioArr)\\
+FERMATA(\underline{NumTreno, Stazione}, Orario)
+}
+
+\[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR' $\wedge$ Stazione='Vicenza'}}(TRENO \bowtie FERMATA) \]
+\[ \Large \Rightarrow \]
+\[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR'}}(TRENO)) \bowtie \sigma_{\text{Stazione='Vicenza'}}(FERMATA)) \]
+\begin{multicols}{2}[Graficamente:]
+
+\begin{center}\includegraphics[scale=0.5]{tree_example_transform}\end{center}
+\begin{center}\includegraphics[scale=0.5]{tree_example_anticip_sel}\end{center}
+\end{multicols}
+
     \item \textbf{Anticipazione della proiezione rispetto al Join:} vale solo se Y sono attributi di B e I suoi attributi sono coinvolti nel join.\\
 $$\Pi_\text{Y}(A \bowtie B) \equiv A \bowtie(\Pi_\text{Y}(B))$$
 \newpage
