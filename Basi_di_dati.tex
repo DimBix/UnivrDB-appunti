@@ -1,7 +1,8 @@
 \documentclass{report}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1.2in]{geometry}
+\usepackage[margin=20mm]{geometry}
 \usepackage{graphicx}
+\graphicspath{ {./img/} }
 \usepackage{amsmath}
 \usepackage{tabularx}
 \usepackage{subcaption}
@@ -11,7 +12,7 @@
 \usepackage{amsthm}
 \renewcommand*\contentsname{Indice}
 
-%El psy kongroo
+% El psy kongroo
 % Definizione di un ambiente per i teoremi
 \newtheorem{teorema}{Teorema}
 \newtheorem{definizione}{Definizione}
@@ -67,12 +68,11 @@ Nella classificazione in base alla derivabilità si distiguono 6 operatori di ba
 \textbf{Operatori derivati:}
 \begin{itemize}
     \item Intersezione
-    \item Jion
+    \item Join
 \end{itemize}
 \newpage
 \subsection{Selezione $\sigma$}
-La selezione è una operazione unaria. Seleziona le tuple di una relazione che soddisfano un predicato
-producendo un sottoinsieme delle stesse, (ossia seleziona le righe della tabella che rispettano la condizione data, ricordiamo che con tuple si intendono le righe della tabella mentre con attributi le singole colonne).\\
+La selezione è un'operazione unaria. Seleziona le tuple di una relazione che soddisfano un predicato producendo un sottoinsieme delle stesse, (ossia seleziona le righe della tabella che rispettano la condizione data, ricordiamo che con tuple si intendono le righe della tabella mentre con attributi le singole colonne).\\
 Lo schema della relazione risultato è lo stesso di quella di origine ed il predicato è costituito dal nome di un attributo, da un operatore, e da un altro argomento che può essere un attributo o un valore
 costante.\\
 $$\sigma_{\text{predicato}}(relazione)$$\\
@@ -80,17 +80,17 @@ La cardinalità di questa operazione è la seguente:\\
 $$ 0 \leq |\sigma_{\text{F}}(R)| \leq |R|$$\\
 
 \subsection{Proiezione $\Pi$}
-La proiezione è una operazione unaria. Data una relazione, la sua proiezione su un dato insieme di attributi è costituita dalla tabella generata dagli attributi specificati, contenente tutte le tuple della tabella di partenza, (ossia estrae tutte le colonne corrispondenti alla lista di attributi specificati).\\
+La proiezione è un'operazione unaria. Data una relazione, la sua proiezione su un dato insieme di attributi è costituita dalla tabella generata dagli attributi specificati, contenente tutte le tuple della tabella di partenza, (ossia estrae tutte le colonne corrispondenti alla lista di attributi specificati).\\
 $$\Pi_{\text{lista attributi}}(relazione)$$\\
 La cardinalità di questa operazione è la seguente:\\
 $$min(|R|, 1) \leq \Pi_{\text{y}}(R) \leq |R|$$\\
 
 \subsection{Ridenominazione $\rho$}
 A volte in preparazione all’esecuzione di una interrogazione o in seguito ad una sua esecuzione si ha bisogno di rinominare gli attributi di una relazione. A tal fine l’operatore di ridenominazione che permette di ottenere una nuova tabella con i nuovi nomi per gli attributi modificati e che ha le stesse tuple della tabella originale.\\
-$$\rho_{\text{nuovo nome $\leftarrow$ vecchio nome}}(relazione)$$\\
+$$\rho_{\text{vecchio nome $\to$ nuovo nome}}(relazione)$$\\
 
 \subsection{Unione $\cup$}
-l’unione fra due tabelle è rappresentata da una tabella costituita dall’unione “matematica” delle due tabelle, dove quindi sono presenti le tuple della prima tabella e quelle della seconda. Affinché l’unione abbia senso, è necessario che:
+L’unione fra due tabelle è rappresentata da una tabella costituita dall’unione “matematica” delle due tabelle, dove quindi sono presenti le tuple della prima tabella e quelle della seconda. Affinché l’unione abbia senso, è necessario che:
 \begin{itemize}
     \item le due tabelle abbiano lo stesso numero di attributi;
     \item i tipi degli attributi corrispondenti siano uguali;
@@ -128,12 +128,33 @@ Esistono diverse varianti di tale operatore comunque riconducibili l’una con l
     \item Theta Join ed Equi Join\\
 \end{itemize}
 \subsection{Join Naturale $\bowtie$}
-Il Join naturale è un operatore binario che correla dati in relazioni diverse sulla base dei valori uguali in attributi con lo stesso nome. La relazione risultante è una tabella che ha come attributi l’unione degli attributi delle tabelle iniziali e contiene solamente le tuple che hanno valori uguali negli attributi a comune.\\
+Il Join naturale è un operatore binario che correla dati in relazioni diverse sulla base dei valori uguali in attributi con lo stesso nome. La relazione risultante è una tabella che ha come attributi l’unione degli attributi delle tabelle iniziali e contiene solamente le tuple che hanno valori uguali negli attributi in comune.\\
+Quando non si hanno attributi comuni il join naturale diventa un prodotto cartesiano, perch\'e genera tutte le possibili coppie. 
+
+\paragraph{Esempio.}  Prendiamo lo schema: \\
+
+\noindent\texttt{DOCENTE(\underline{CFDocente}, Nome, Cognome) \\
+CORSO(\underline{Nome}, CFDocente)}\\
+
+\noindent Si richiede di produrre l'insieme dei corsi riportando: nome del corso e cognome del docente.
+\[ \Pi_{\text{NomeCorso, Cognome}}(\rho_{\text{Nome $\to$ NomeCorso}}(CORSO) \bowtie \thickspace DOCENTE)\]
+Graficamente si ottiene:
+
+\begin{center}
+\includegraphics[scale=0.35]{join_example}
+
+\end{center}
+
+
 Il Join può essere ottenuto tramite un prodotto cartesiano e una selezione imponendo l’uguaglianza su tutti gli attributi in comune:\\
-$$\sigma_{\text{A.attributo\_comune = B.attributo\_comune}}(A \times B)$$\\
-Il Join si dice completo se ogni tupla della relazione A contribuisce a generare almeno una tupla della relazione risultato, altrimenti si dice incompleto e le tuple che non contribuiscono al risultato si chiamano \textbf{dangling tuples}.\\
-La cardinalità del Join Naturale è la seguente:\\
-$$0 \leq |R1 \bowtie R2| \leq |R1| \cdot |R2|$$\\
+$$\sigma_{\text{NomeCorso = Nome}}(DOCENTE \times CORSO)$$\\
+Il Join si dice completo se ogni tupla della relazione A contribuisce a generare almeno una tupla della relazione risultato, altrimenti si dice incompleto e le tuple che non contribuiscono al risultato si chiamano \textbf{dangling tuples}.
+
+La cardinalità del Join Naturale è, in generale:
+\[0 \leq |R1 \bowtie R2| \leq |R1| \cdot |R2|\]
+Se il join \`e completo la cardinalit\`a diventa:
+\[ max(|R1|, |R2|) \leq |R1 \bowtie R2| \leq |R1| \cdot |R2| \]
+
 \newpage
 \subsection{Theta Join ed Equi Join}
 Nel caso del Theta Join, l'operatore della condizione di selezione eseguita dopo il prodotto cartesiano viene esplicitato. Nel caso in cui OP (ossia l'operatore nella selezione) sia composta solo da uguaglianze, l’operazione prende il nome di Equi-join.\\
