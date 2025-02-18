@@ -138,7 +138,7 @@ Ricordarsi inoltre che lo schema della relazione risultato è il seguente (X è 
 $$X3 = X1 \cup X2$$\\
 \newpage
 \subsection{Theta Join ed Equi Join}
-Nel caso del Theta Join, l'operatore della condizione di selezione eseguita dopo il prodotto cartesiano viene esplicitato. Nel caso in cui OP (ossia l'operatore nella selezione) sia composta solo da uguaglianze, l’operazione prende il nome di Equi-join.\\
+Nel caso del Theta Join, l'operatore della condizione di selezione eseguita dopo il prodotto cartesiano viene esplicitato. Nel caso in cui OP (ossia l'operatore nella selezione) sia composta solo da uguaglianze, l’operazione prende il nome di Equi-join. La condizione per aplicare il theta join è che i due \textbf{schemi siano disgiunti} (ossia non ci siano attributi in comune)\\
 $$ A \bowtie_{\text{$\theta$}}B$$\\
 Ricordiamo che è possibile riscrivere il Join tramite il prodotto cartesiano e la selezione:\\
 $$\sigma_{\text{A.attributo\_comune $\theta$ B.attributo\_comune}}(A \times B)$$\\
