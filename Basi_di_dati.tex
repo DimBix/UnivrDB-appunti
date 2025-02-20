@@ -188,6 +188,14 @@ Date due relazioni $R1$ e $R2$ di schema $X_1$ e $X_2$, con $X_1 \cap X_2 = \{ C
 \[ R1 \bowtie R2 = \Pi_{X_1 \cup X_2} \left(R1 {\bowtie \atop C_1=C_1' \wedge \dots \wedge C_m=C_m'} \rho_{C_1,\dots,C_m \to C_1', \dots, C_m'}(R2)\right) \]
 In questo caso si hanno due relazioni che hanno attributi comuni ($\{ C_1, \dots, C_m\}$) e quindi si devono ridenominare gli attributi di una delle due relaizoni, nell'esempio quelli di $R2$. A questo punto gli schemi sono disgiunti e la condizione del theta-join sar\`a una congiunzione di uguaglianze: $C_1=C_1' \wedge \dots \wedge C_m=C_m'$. Gli attributi che si ottengono nel risultato del theta-join sono la somma degli attributi di $R1$ e di $R2$, cosa che non avviene nel join naturale. Per questo motivo si proietta su $\Pi_{X_1\cup X_2}$, in questo modo l'unione considera gli attributi di tutte e due le relazioni ma esclude i $C_1', \dots, C_m'$ generati nell'espressione.
 
+\subsection{Join esterni}
+Consentono di ottenere nel risultato del join tutte le tuple, anche le \textbf{dangling tuples}, di una o di entrambe le relazioni coinvolte nel join, eventualmente estese con valori nulli:
+\begin{itemize}
+	\item \textbf{left join}: $r_1 \bowtie_{LEFT} r_2$;
+	\item \textbf{right join}: $r_1 \bowtie_{RIGHT} r_2$;
+	\item \textbf{full join}: $r_1 \bowtie_{FULL} r_2$;
+\end{itemize}
+
 \section{Ottimizzazione}
 \subsection{Valori nulli}
 E’ opportuno estendere l’algebra relazionale affinché possa manipolare anche relazioni che contengono \emph{valori nulli} (NULL). Le operazioni che devono essere raffinate per gestire relazioni che contengono valori nulli sono in particolare \textbf{selezione} e \textbf{join naturale}.\\
@@ -230,23 +238,24 @@ Esempio:
 
 
 \subsubsection{Trasformazioni di equivalenza}
-Le principali trasformazioni sono quattro. Sia $E$ un'espressione di schema $X$, si definiscono le seguenti trasformazioni di equivalenza:
-\begin{itemize}
-    \item \textbf{Atomizzazione delle selezioni:} una congiunzione di selezioni può essere sostituita da una sequenza di selezioni atomiche.
-\[ \sigma_\text{F1 $\wedge$ F2}(E) \equiv \sigma_\text{F1}(\sigma_\text{F2}(E))\] \`E propedeutica ad altre trasformazioni. Non ottimizza se non \`e seguita da altre trasformazioni. \\
-Esempio:\\
+Le principali trasformazioni sono quattro. Consideriamo, per gli esempi, il seguente schema relazionale:\\
 \texttt{
 TRENO(\underline{NumTreno}, OrarioPart, Cat, Dest, OrarioArr)\\
 FERMATA(\underline{NumTreno, Stazione}, Orario)
 }
 
+Sia $E$ un'espressione di schema $X$, si definiscono le seguenti trasformazioni di equivalenza:
+\begin{itemize}
+    \item \textbf{Atomizzazione delle selezioni:} una congiunzione di selezioni può essere sostituita da una sequenza di selezioni atomiche.
+\[ \sigma_\text{F1 $\wedge$ F2}(E) \equiv \sigma_\text{F1}(\sigma_\text{F2}(E))\] \`E propedeutica ad altre trasformazioni. Non ottimizza se non \`e seguita da altre trasformazioni. \\
+Esempio:
 \[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR' $\wedge$ Stazione='Vicenza'}}(TRENO \bowtie FERMATA) \]
 \[ \Large \Rightarrow \]
 \[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR'}}(\sigma_{\text{Stazione='Vicenza'}}(TRENO \bowtie FERMATA))) \]
 \begin{multicols}{2}[Graficamente:]
 
-\begin{center}\includegraphics[scale=0.5]{tree_example_transform}\end{center}
-\begin{center}\includegraphics[scale=0.5]{tree_example_atomizz_sel}\end{center}
+\begin{center}\includegraphics[scale=0.45]{tree_example_transform}\end{center}
+\begin{center}\includegraphics[scale=0.45]{tree_example_atomizz_sel}\end{center}
 \end{multicols}
     \item \textbf{Idempotenza delle proiezioni:} una proiezione può essere trasformata in una sequenza di proiezioni che eliminano i vari attributi in varie fasi.
 \[ \Pi_\text{A}(E) \equiv \Pi_\text{A}(\Pi_\text{A,B}(E)) \text{ dove }B \subseteq X \]
@@ -257,25 +266,30 @@ Siano $E_1$ ed $E_2$ espressioni di schema $X_1$ e $X_2$, si definiscono le segu
 \begin{itemize}
     \item \textbf{Anticipazione della selezione rispetto al join:} questa espressione vale solo se $F$ conivolge \textbf{solo} gli attributi di $E_2$.
 \[ \sigma_{F}(E_1 \bowtie E_2) \equiv_R E_1 \bowtie \sigma_{F}(E_2) \]
-Esempio:\\
-\texttt{
-TRENO(\underline{NumTreno}, OrarioPart, Cat, Dest, OrarioArr)\\
-FERMATA(\underline{NumTreno, Stazione}, Orario)
-}
 
+Esempio:
 \[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR' $\wedge$ Stazione='Vicenza'}}(TRENO \bowtie FERMATA) \]
 \[ \Large \Rightarrow \]
 \[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR'}}(TRENO)) \bowtie \sigma_{\text{Stazione='Vicenza'}}(FERMATA)) \]
 \begin{multicols}{2}[Graficamente:]
 
-\begin{center}\includegraphics[scale=0.5]{tree_example_transform}\end{center}
-\begin{center}\includegraphics[scale=0.5]{tree_example_anticip_sel}\end{center}
+\begin{center}\includegraphics[scale=0.45]{tree_example_transform}\end{center}
+\begin{center}\includegraphics[scale=0.45]{tree_example_anticip_sel}\end{center}
 \end{multicols}
 
     \item \textbf{Anticipazione della proiezione rispetto al Join:} vale solo se Y sono attributi di B e I suoi attributi sono coinvolti nel join.\\
-$$\Pi_\text{Y}(A \bowtie B) \equiv A \bowtie(\Pi_\text{Y}(B))$$
-\newpage
-    \item Esistono poi altre minori otimizzazioni come l'inglobamento di una selezione in un Join (da eseguire solo se non è possibile anticipare la selezione), in questo caso la condizione di selezione sarà assorbita nel Theta Join.\\
+\[\Pi_\text{Y}(A \bowtie B) \equiv A \bowtie(\Pi_\text{Y}(B))\]
+Esempio:
+\[ \Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR' $\wedge$ Stazione='Vicenza'}}(TRENO \bowtie FERMATA) \]
+\[ \Large \Rightarrow \]
+\[ \Pi_{\text{NumTreno, OrarioPart}}(\Pi_{\text{NumTreno, OrarioPart}}(\sigma_{\text{Cat='FR'}}(TRENO)) \bowtie \Pi_{\text{NumTreno}}(\sigma_{\text{Stazione='Vicenza'}}(FERMATA)) \]
+\begin{multicols}{2}[Graficamente:]
+
+\begin{center}\includegraphics[scale=0.45]{tree_example_transform}\end{center}
+\begin{center}\includegraphics[scale=0.45]{tree_example_anticip_projection}\end{center}
+\end{multicols}
+
+    \item Esistono poi altre otimizzazioni minori come l'inglobamento di una selezione in un join (da eseguire solo se non è possibile anticipare la selezione), in questo caso la condizione di selezione sarà assorbita nel \textbf{theta-join}.\\
 $$\sigma_\text{F}(A \bowtie B) \equiv A \bowtie_\text{F} B$$
     Infine è bene ricordare anche le trasformazioni con gli operatori insiemistici:\\
 $$\sigma_\text{F or G}(A) \equiv \sigma_\text{F}(A) \cup \sigma_\text{G}(A)$$
