@@ -291,14 +291,136 @@ Esempio:
     \item Esistono poi altre otimizzazioni minori come l'inglobamento di una selezione in un join (da eseguire solo se non è possibile anticipare la selezione), in questo caso la condizione di selezione sarà assorbita nel \textbf{theta-join}.\\
 $$\sigma_\text{F}(A \bowtie B) \equiv A \bowtie_\text{F} B$$
     Infine è bene ricordare anche le trasformazioni con gli operatori insiemistici:\\
-$$\sigma_\text{F or G}(A) \equiv \sigma_\text{F}(A) \cup \sigma_\text{G}(A)$$
-$$\sigma_\text{F and G}(A) \equiv \sigma_\text{F}(A) \cap \sigma_\text{G}(A)$$
+$$\sigma_\text{F $\vee$ G}(A) \equiv \sigma_\text{F}(A) \cup \sigma_\text{G}(A)$$
+$$\sigma_\text{F $\wedge$ G}(A) \equiv \sigma_\text{F}(A) \cap \sigma_\text{G}(A)$$
     
+\end{itemize}
+
+\newpage
+\chapter{Calcolo Relazionale}
+
+\`E un linguaggio di interrogazione dichiarativo che specifica le propriet\`a del risultato dell'interrogazione. Esistono due versione del \emph{calcolo relazionale}:
+\begin{itemize}
+	\item sui domini\footnote{Non presente nel programma.};
+	\item \textbf{sulle tuple} (\`e il fondamento teorico del linguaggio \textbf{SQL}).
+\end{itemize}
+
+\section{Calcolo relazionale sulle tuple}
+
+Nel calcolo relazionale sulle tuple l'interrogazione viene specificata attraverso una \emph{formula logica con variabili libere}. La formula viene interpretata sul \textbf{contenuto della base di dati} e le variabili assumono come valori le tuple delle relazioni.
+
+Il calcolo relazionale sulle tuple definisce la semantica del linguaggio SQL \emph{semplice}\footnote{Senza operatori aggregati e senza join esterni.}, includendo le interrogazioni nidificate.
+
+\subsection{Formule logiche con variabili libere}
+Una variabile si dice \textbf{libera} in una forma logica $F$ se non compare in un \emph{quantificatore} (esistenziale $\exists$ o universale $\forall$) di $F$.
+
+\subsubsection{Esempi:}
+\begin{itemize}
+\item $F_1(x) \equiv x>3$ $x$ \`e libera.
+\item $F_2(x,y) \equiv x>3 \wedge x<6 \wedge y=10$ $x,y$ sono variabili libere.
+\item $F_3(x) \equiv x > 0 \wedge \exists y(y<0)$ $x$ \`e libera, $y$ \`e legata.
+\item $F_4(x) \equiv x>3 \wedge \exists y(y<x)$ $x$ \`e libera, $y$ \`e legata.
+\item $F_5(z) \equiv z<10 \wedge \forall y(y<z)$ $z$ \`e libera, $y$ \`e legata.
+\end{itemize}
+
+L'\textbf{interpretazione} \`e la scelta degli insiemi da cui prelevare i valori da sostituire alle variabili. Ad esempio, posso segliere di interpretare le formule nell'insieme degli interi ($\mathbb{Z}$) o nell'insieme dei naturali ($\mathbb{N}$).
+
+\subsubsection{Esempio:}
+\[ F_3(x) \equiv x>0 \wedge \exists y(y<0) \]
+$F_3(5)$ \`e vera in $\mathbb{N}$? $5 > 0 \to$\texttt{True}, $\exists y(y<0) \to$\texttt{False}. \texttt{True} $\wedge$ \texttt{False} $=$ \texttt{False}, perci\`o la formula \`e falsa.
+$F_3(5)$ \`e invece vera nell'insieme dei numeri interi $\mathbb{Z}$. Possiamo dunque notare che al variare dell'insieme di interpretazione, cambia il risultato.
+\newpage
+\subsection{Sintassi del calcolo relazionale sulle tuple}
+
+Le espressioni del calcolo relazionale sulle tuple hanno la seguente forma:
+\[ \{ \text{\texttt{T}} | \text{\texttt{L}} | \text{\texttt{F}} \} \]
+\begin{itemize}
+\item \textbf{Target list} \texttt{T} $\to$ corrisponde alla \texttt{SELECT} dell'SQL. Definisce lo \emph{schema della relaziona risultato} e come le tuple risultato si ottengono dalle variabili libere.
+\item \textbf{Range list} \texttt{L} $\to$ corrisponde a \texttt{FROM} dell'SQL. Definisce le \emph{variabili libere} e le collega alle relazioni della base di dati coinvolte nell'interrogazione.
+\item \textbf{Formula} \texttt{F} $\to$ corrisponde a \texttt{WHERE} dell'SQL. Specifica la condizione che deve essere soddisfatta dalle variabili libere, vale a dire dalle tuple coinvolte nell'interrogazione.
+\end{itemize}
+
+\subsubsection{Target list}
+\texttt{T} \`e una lista di elementi separati da virgole $e_1, \dots, e_n$ dove ogni elemento $e_i$ pu\`o essere:
+\begin{itemize}
+	\item \texttt{Y: x. (Z)}, dove \texttt{Y} e \texttt{Z} sono sequenze di attributi con la stessa cardinalit\`a e \texttt{x} \`e una \emph{variabile libera}.
+	\item \texttt{x. (Z)}, dove \texttt{Z} \`e una sequenza di attributi e \texttt{x} \`e una \emph{variabile libera} (equivale a \texttt{Z: x. (Z)}). 
+	\item \texttt{x. *}, dove \texttt{x} \`e una \emph{variabile libera}; in questo caso gli attributi sono esattamente tutti quelli della relazione associata alla variabile \texttt{x} nella \textbf{range list} \texttt{L}.
+\end{itemize}
+
+\subsubsection{Range list}
+\texttt{L} \`e una lista di elementi separati da virgole $r_1, \dots, r_m$ dove ogni elemento $r_i$ \`e strutturato come \texttt{x\textsubscript{j}(R)}, in cui \texttt{R} rappresenta una relazione, o tabella, della base di dati. (La variabile $x_j$ prender\`a come valori le tuple della tabella $R$ quando si va a valutare la formula).
+Il numero degli elementi \textbf{deve corrispondere} al numero di variabili libere.
+
+\subsubsection{Formula}
+\texttt{F} pu\`o essere 
+\begin{itemize}
+	\item una \textbf{formula atomica}, del tipo \texttt{x.A $\theta$ c} oppure \texttt{x\textsubscript{1}.A\textsubscript{1} $\theta$ x\textsubscript{2}.A\textsubscript{2}}, dove \texttt{x, x\textsubscript{1}, x\textsubscript{2}} sono variabili, \texttt{A, A\textsubscript{1}, A\textsubscript{2}} sono attributi, \texttt{c} \`e una costante e $\theta \in \{ =, \ne, >, <, \le, \ge\}$. Nelle formule atomiche \emph{tutte le variabili} sono \emph{LIBERE}.
+	\item oppure una \textbf{formula non atomica}:
+	\begin{itemize}
+		\item se $f_1$ e $f_2$ sono formule, allora anche $f_1 \wedge f_2$, $f_1 \vee f_2$, $\neg f_1$, e $\neg f_2$ lo sono.
+		\item Se $f$ \`e una formula, allora anche $\forall x(R) (f)$ e $\exists x (R) (f)$ lo sono. 
+	\end{itemize}
+	Nelle formule $\forall x (f)$ e $\exists x(f)$, $x$ \`e una variabile \emph{LEGATA}, mentre tutte le altre variabili sono libere o legate se lo sono in $f$.
+Inoltre, le congiunzioni, disgiunzioni e la negazione non cambiano l'insieme delle variabili \emph{LIBERE} o \emph{LEGATE} di una formula.
+\end{itemize}
+
+\subsection{Semantica: interpretazione delle formule}
+
+Le formule vengono interpretate sull'istanza corrente della
+\begin{itemize}
+\item base di dati $db = \{r_1, \dots, r_n\}$ 
+\item di schema $S = \{R_1(X_1), \dots, R_n(X_n)\}$
+\end{itemize}
+Ogni formula contiene un certo numero di variabili libere:
+\begin{itemize}
+\item $f(x_1, \dots, x_2)$
+\end{itemize}
+
+Data una ennupla di tuple $t_1, \dots, t_n$, tale ennupla rende vera la formula se, quando sostituisco le tuple $t_1, \dots, t_n$ alle variabili libere $x_1, \dots, x_n$, tale sostituzione soddisfa la formula.
+
+\subsubsection{Formule atomiche}
+\begin{itemize}
+\item \texttt{x\textsubscript{1}.A\textsubscript{1} $\theta$ x\textsubscript{2}.A\textsubscript{2}} \`e vera sulle tuple $(t_1, t_2)$, se il confronto \texttt{t\textsubscript{1}[A\textsubscript{1}] $\theta$ t\textsubscript{2}[A\textsubscript{2}]} \`e soddisfatto.
+\item \texttt{x\textsubscript{1}.A\textsubscript{1} $\theta$ c} \`e vera sulla tupla $t_1$, se il confronto \texttt{t\textsubscript{1}[A\textsubscript{1}] $\theta$ c} \`e soddisfatto.
+\end{itemize}
+
+\subsubsection{Formule non atomiche}
+
+Le formule $f_1 \wedge f_2$, $f_1 \vee f_2$, $\neg f_1$, $\neg f_2$ sono vere secondo le usuali definizioni dei connettivi logici (tabelle di verit\`a).
+
+\subsubsection{Formule con quantificatori}
+
+\begin{itemize}
+\item $\exists x(R_i)(f)$ con variabili libere $(x_1, \dots, x_q)$ \`e vera sulle tuple $(t_1, \dots, t_q)$, se \textbf{esiste almeno} una tupla $t\in r_1$\footnote{Istanza di $R_i$} tale che $f$ \`e vera quando si sostituiscono le tuple $(t, t_1, \dots, t_q)$ alle variabili $(x, x_1, \dots, x_q)$.
+\item $\forall x(R_i)(f)$ con variabili libere $(x_1, \dots, x_q)$ \`e vera sulle tuple $(t_1, \dots, t_q)$, se \textbf{per ogni} tupla $t\in r_i$, $f$ \`e vera quando si sostituiscono le tuple $(t, t_1, \dots, t_q)$ alle variabili $(x, x_1, \dots, x_q)$.
 \end{itemize}
 
 
 
-\newpage
-\chapter{Calcolo Relazionale}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}
