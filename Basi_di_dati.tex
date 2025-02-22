@@ -11,8 +11,11 @@
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{tikz}
 \usepackage{amsthm}
 \renewcommand*\contentsname{Indice}
+
 
 % El psy kongroo
 % Definizione di un ambiente per i teoremi
@@ -399,16 +402,106 @@ Le formule $f_1 \wedge f_2$, $f_1 \vee f_2$, $\neg f_1$, $\neg f_2$ sono vere se
 \end{itemize}
 
 
+\subsection{Semantica di una interrogazione}
 
+Interpretazone di un'espressione del calcolo come interrogazione. Struttura:
+\[ Q= \{Y_1:x_1 . (Z_1),\dots,Y_k:x_k . (Z_k) | x_1(R_1), \dots, x_n(R_n) | f(x_1, \dots, x_n) \} \]
 
+La valutazione dell'interrogazione $Q$ produce una relazione risultato $R$ dove:
+\begin{itemize}
+\item Lo schema di $R$ \`e $Y = Y_1 \cup \dots \cup Y_k$
+\item $R$ contiene tutte le tuple $t$ su $Y$ tali che esiste una ennupla di tuple $(t_1, \dots, t_n) \in R_1 \times \dots \times R_n$, che generano $t$ e che sostituite alle variabili libere $(x_1, \dots, x_n)$ rendono vera $f$.
+\end{itemize}
 
+\subsection{Osservazioni}
+Il calcolo relazionale sulle tuple \textbf{non \`e equivalente all'algebra relazionale} e non \`e equivalente al calcolo relazionale sui domini, in quanto l'unione di due relazioni non \`e rappresentabile nel calcolo relazionale sulle tuple.
 
+\`E invece possibile rappresentare nel calcolo relazionale sulle tuple sia l'intersezione che la differenza tra due relazioni.
 
+\subsection{Operatori insiemistici nel calcolo relazionale sulle tuple}
 
+\subsubsection{Intersezione}
+L'intersezione tra due relazioni $R_1$ e $R_2$ di schema $X=(A_1, \dots, A_n)$ si ottiene:
+\[ R_1 \cap R_2 \equiv \{ x.* | x(R_1), y_2(R_2) | x.A_1 = y.A_1 \wedge \dots \wedge x.A_n = y.A_n \} \]
+Possiamo ottenere lo stesso risultato utilizzando il quantificatore esistenziale ($\exists$):
+\[ R_1 \cap R_2 \equiv \{ x.* | x(R_1)| \exists y(R_2)(x.A_1 = y.A_1 \wedge \dots \wedge x.A_n = y.A_n) \} \]
 
+\subsubsection{Differenza}
 
+La differenza tra due relazioni $R_1$ e $R_2$ di schema $X=(A_1, \dots, A_n)$ si scrive:
+\[ R_1 - R_2 \equiv \{x.* | x(R_1) | \neg \exists y(R_2) (x.A_1=y.A_1 \wedge \dots \wedge x.A_n = y.A_n) \} \]
 
+\subsubsection{Unione}
 
+L'unione tra due relazioni $R_1$ e $R_2$ di schema $X=(A_1, \dots, A_n)$ \textbf{\color{red}{non \`e esprimibile}} in quanto \textbf{non \`e possibile associare una variabile libera a pi\`u relazioni della base di dati}.
+
+Notare che $\{ x_1.*, x_2.* | x_1(R_1), x_2(R_2) | true \}$ genera il \emph{prodotto cartesiano} e non l'unione.
+
+\subsection{Esercizi}
+
+Schema:\\
+\texttt{TRENO(\underline{Num}, Cat, Part, Arr, Dest)\\
+FERMATA(\underline{Treno, Staz}, Orario)}
+
+\paragraph{Q\textsubscript{0}: Trovare il numero e l'ora di partenza dei treni Freccia Rossa con destinazione Milano Centrale.}
+
+\[ Q_0: \{t.(\text{\texttt{Num, Part}}) |t(\text{\texttt{TRENO}}) | t.\text{\texttt{Cat='FR'}} \wedge t.\text{\texttt{Dest='Milano Centrale'}} \} \]
+
+\paragraph{Q\textsubscript{1}: Trovare l'elenco di tutte le fermate dei treni regionali, riportando nel risultato il numero del treno e la stazione di fermata.}
+
+\[ Q_1: \{f.(\text{\texttt{Treno, Staz}}) | t(\text{\texttt{TRENO}}), f(\text{\texttt{FERMATA}}) | t.\text{\texttt{Cat='REG'}} \wedge t.\text{\texttt{Num}} = f.\text{\texttt{Treno}} \} \]
+
+\paragraph{Q\textsubscript{2}: Trovare l'elenco di tutti i treni Freccia Rossa che fermano a Venezia Mestre riportando: il numero del treno, l'orario di partenza e l'orario di arrivo.}
+
+\[ Q_2: \{t.(\text{\texttt{Num, Part}}), f.(\text{\texttt{Orario}}) | t(\text{\texttt{TRENO}}), f(\text{\texttt{FERMATA}}) |t.\text{\texttt{Num}} = f.\text{\texttt{Treno}}\wedge f.\text{\texttt{Staz='Venezia Mestre'}} \wedge t.\text{\texttt{Cat='FR'}} \} \]
+
+\paragraph{Q\textsubscript{3}: Trovare la destinazione e l'orario di partenza dei treni che fermano a Padova.}
+
+\[ Q_3: \{t.(\text{\texttt{Dest, Part}})| t(\text{\texttt{TRENO}}), f(\text{\texttt{FERMATA}}) |t.\text{\texttt{Num}} = f.\text{\texttt{Treno}}\wedge f.\text{\texttt{Staz='Padova'}}\} \]
+oppure 
+\[ Q_3: \{t.(\text{\texttt{Dest, Part}})| t(\text{\texttt{TRENO}}) | \exists f(\text{\texttt{FERMATA}}) (t.\text{\texttt{Num}} = f.\text{\texttt{Treno}}\wedge f.\text{\texttt{Staz='Padova'}})\} \]
+
+\paragraph{Q\textsubscript{4}: Trovare la destinazione e l'orario di partenza dei treni che \underline{non fermano} a Padova.}
+
+In questo caso non possiamo mettere \texttt{FERMATA} nella target list. Questa interrogazione non pu\`o essere ottenuta attraverso un join, ma si ottiene con una differenza.
+
+\[ Q_4: \{t.(\text{\texttt{Dest, Part}})| t(\text{\texttt{TRENO}}) | \neg\exists f(\text{\texttt{FERMATA}}) (t.\text{\texttt{Num}} = f.\text{\texttt{Treno}}\wedge f.\text{\texttt{Staz='Padova'}})\} \]
+
+\subsection{Calcolo relazionale sulle tuple}
+
+Il calcolo relazionale sulle tuple \`e equivalente al linguaggio di interrogazione adottato dallo standard SQL2 se consideriamo la forma base dell'interrogazione SQL senza operatori aggregati e raggrupamenti. 
+
+L'espressione del calcolo \texttt{\{ T | L | F\}} \`e in diretta corrispondenza con la forma base delle interrogazioni SQL.
+\begin{center}
+\begin{tikzpicture}
+\node at (0,5) [above] {\texttt{\{T | L | F \}}};
+\draw[->][red][thick] (-0.82,5.1) -- (-1.15, 4.3); 
+\draw[->][blue][thick] (0,5.1) -- (0.60,4.3);
+\draw[->][teal][thick] (0.82,5.1) -- (2.4,4.3);
+\node at (0,4.5) [below] {\texttt{SELECT [ ] FROM [ ] WHERE [ ]}}; 
+\end{tikzpicture}
+\end{center}
+
+\subsubsection{Uso dei quantificatori}
+
+Nelle formule del calcolo \`e possibile esprimere condizioni attravarso l'uso di quantificatori ($\exists$ e $\forall$).
+
+Le espressioni che possono essere specificate attraverso i quantificatori corrispondono in SQL a clausole \texttt{WHERE} nelle quali compaiono \textbf{predicati complessi che richiedono interrogazioni nidificate}.
+
+\subsubsection{Esempio}
+Schema:\\
+\texttt{TRENO(\underline{Num}, Cat, Part, Arr, Dest)\\
+FERMATA(\underline{Treno, Staz}, Orario)}
+
+\paragraph{Q\textsubscript{5}: Trovare il numero e la categoria dei treni che fermano a Vicenza e fermano a Padova dopo le 20:30.}
+
+\[ Q_5: \{\text{\texttt{Numero, Categoria}}:t.(\text{\texttt{Num, Cat}})| t(\text{\texttt{TRENO}}) | \exists f_1(\text{\texttt{FERMATA}}) (t.\text{\texttt{Num}} = f_1.\text{\texttt{Treno}}\wedge f_1.\text{\texttt{Staz='Vicenza'}\\})\]
+\[ \wedge \exists f_2(\text{\texttt{FERMATA}}) (t.\text{\texttt{Num}} = f_2.\text{\texttt{Treno}}\wedge f_2.\text{\texttt{Staz='Padova'}} \wedge f_2.\text{\texttt{Orario > 20:30}})\} \]
+
+\`E possibile eliminare il quantificatore esistenziale nell'esempio $Q_5$, perch\'e non \`e negato. In altre parole, questa interrogazione \`e possibile farla in \emph{algebra relazionale} utilizzando due join. Alternativa:
+
+\[ Q_5: \{\text{\texttt{Numero, Categoria}}:t.(\text{\texttt{Num, Cat}})| t(\text{\texttt{TRENO}}), f_1(\text{\texttt{FERMATA}}), f_2(\text{\texttt{FERMATA}})| \]
+\[ t.\text{\texttt{Num}} = f_1.\text{\texttt{Treno}}\wedge f_1.\text{\texttt{Staz='Vicenza'}\\} \wedge t.\text{\texttt{Num}} = f_2.\text{\texttt{Treno}} \wedge f_2.\text{\texttt{Staz='Padova'}} \wedge f_2.\text{\texttt{Orario > 20:30}}\} \]
 
 
 
