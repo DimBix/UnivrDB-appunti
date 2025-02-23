@@ -11,10 +11,12 @@
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{multicol}
+\usepackage{listings}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{amsthm}
 \renewcommand*\contentsname{Indice}
+
 
 
 % El psy kongroo
@@ -585,6 +587,199 @@ Possiamo scrivere questa interrogazione in Algebra:
 \node at (6, 0) [below] {$P$: \texttt{Dest = Dest'' $\wedge$ Part < Part'' $\wedge$ Part'' < Part'}};
 \end{tikzpicture}
 \end{center}
+
+\chapter{Interrogazioni nei sistemi document-based}
+
+\section{Linguaggi di interrogazione nei sistemi NoSQL}
+
+Nei sistemi NoSQL spesso non sono disponibili veri e propri linguaggi di interrogazione come nei sistemi relazionali. Solo i sistemi \textbf{document-based} forniscono strumenti simili ad algebra e calcolo relazionale per l'accesso ai dati. Due esempi sono:
+\begin{itemize}
+\item \textbf{Couchbase}, che fornisce il linguaggio SQL++, simile all'SQL e dichiarativo.
+\item \textbf{MongoDB}, che fornisce una \textbf{serie di operatori} che consentono di scrivere complesse espressioni algebriche (pipeline) per estrarre dati dalle collezioni di documenti.
+\end{itemize}
+
+\subsubsection{Sistemi document-store}
+\begin{multicols}{2}
+\includegraphics[scale=0.4]{document_store_example} 
+\newcolumn
+\begin{lstlisting}
+		DOC_Ins
+{
+ _id: autogen
+ nome: String
+ annoac: String
+ docente: String
+}
+
+		DOC_Stu
+{
+ _id: autogen
+ nome: String
+ cognome: String
+ esami: [{Ins_id: integer
+ 			voto: integer
+ 			data: date},
+ 			...]
+}
+\end{lstlisting}
+\end{multicols}
+\newpage
+\subsection{Approccio MongoDB}
+
+Buona parte del linguaggio di interrogazione di MongoDB \`e realizzato attraverso il metodo \texttt{find}. Interrogazione sull'esempio sopra riportato:
+
+\begin{lstlisting}
+db.studenti.insertMany([
+{_id: ``VR00010'', nome: ``Mario'', cognome: ``Rossi''
+ esami: [{ins: ``Basi di dati'', voto: 22, data: ``1/7/2016'' },
+ 	{ins: ``Algebra'', voto: 26, data: ``5/7/2015'' }] }
+{_id: ``VR00011'', nome: ``Maria'', cognome: ``Bianchi''
+ esami: [{ins:' ``Algebra'', voto: 30, data: ``1/7/2016'' }]}
+]);
+\end{lstlisting}
+
+\subsubsection{Interrogazioni semplici}
+Il sistema nasce inizialmente per fare solo questo tipo di interrogazioni. Le interrogazioni semplici sono quelle \emph{monocollezione}.
+\begin{itemize}
+\item Trovare tutti gli studenti:
+\begin{lstlisting}
+db.studenti.find( {} )
+\end{lstlisting}
+\item Trovare tutti gli studenti di cognome \emph{Rossi}:
+\begin{lstlisting}
+db.studenti.find( {cognome: ``Rossi''} )
+\end{lstlisting}
+\item Trovare tutti gli studenti di cognome ``Rossi'' e nome ``Mario'':
+\begin{lstlisting}
+db.studenti.find( {cognome: ``Rossi'', nome: ``Mario''} )
+\end{lstlisting}
+\item Trovare tutti gli studenti di cognome ``Rossi'' o ``Bianchi'':
+\begin{lstlisting}
+db.studenti.find( {cognome: {$in:[``Rossi'', ``Bianchi''] }} )
+\end{lstlisting}
+\end{itemize}
+
+\subsubsection{Operatori logici e di confronto}
+
+\begin{itemize}
+\item \texttt{\$and}: unisce due clausole con un and logico e restituisce tutti i documenti che rispettano entrambe le clausole.
+\begin{lstlisting}
+{$and: [{Esami.voto: {$gte: 21}}, {Esami.voto: {$lte: 26}} ]}
+\end{lstlisting}
+\item \texttt{\$not}: inverte l'effetto dell'espressione di interrogazione e restituisce i documenti che \textbf{non rispettano} la clausola.
+\item \texttt{\$nor}: unisce le clausole con un nor logico e restituisce i documenti che \textbf{non rispettano} entrambe le clausole.
+\item \texttt{\$or}: unisce le clausole con un or logico e restituisce i documenti che rispettano almeno una delle due clausole.
+\begin{lstlisting}
+{$or: [{Cognome: ``Rossi''}, {Cognome: ``Bianchi''}]}
+\end{lstlisting}
+\item \texttt{\$eq}: restituisce i valori uguali ad un valore specificato.
+\item \texttt{\$gt}/\texttt{\$lt}: restituisce i valori maggiori/minori di un valore specificato.
+\item \texttt{\$gte}/\texttt{\$lte}: restituisce i valori maggiori o uguali/minori o uguali di un valore specificato.
+\item \texttt{\$in}: corrispondenza con qualsiasi valore all'interno di un dato array.
+\item \texttt{\$ne}: corrispondenza con tutti i valori diversi da un valore specificato.
+\item \texttt{\$nin}: corrispondenza con nessuno dei valori specificati in un array.
+\end{itemize}
+
+\subsubsection{Interrogazioni su dati incapsulati}
+
+\begin{itemize}
+\item Trovare tutti gli studenti che hanno registrato \emph{almeno un esame} con voto 30:
+\begin{lstlisting}
+db.studenti.fint( {esami.voto: 30} )
+\end{lstlisting}
+\item Trovare tutti gli studenti che hanno registrato \emph{almeno un esame} con voto maggiore di 22:
+\begin{lstlisting}
+db.studenti.find( {esami.voto: { $gt: 22 } } )
+\end{lstlisting}
+\end{itemize}
+
+\subsubsection{Interrogazioni con proiezione}
+
+La proiezione permette di definire qual \`e la struttura del documento risultato.\\
+Esempi:
+\begin{itemize}
+\item Trovare il cognome degli studenti di nome ``Mario'':
+\begin{lstlisting}
+db.studenti.find( {nome: ``Mario''}, {cognome: 1} )
+\end{lstlisting}
+\item Trovare il cognome degli studenti di nome ``Mario'' escludendo il campo \texttt{\_id}:
+\begin{lstlisting}
+db.studenti.find( {nome: ``Mario''}, {cognome: 1, _id: 0} )
+\end{lstlisting}
+\item Trovare la matricola e i voti di tutti gli studenti:
+\begin{lstlisting}
+db.studenti.find( { }, {_id: 1, esami.voto: 1} )
+\end{lstlisting}
+\end{itemize}
+
+\subsubsection{Interrogazioni con join}
+
+Per eseguire un join tra due collezioni di documenti \`e necessario usare l'operazione \texttt{\$lookup} di \texttt{aggregate}. Questo tipo di interrogazioni non sono consigliate dal sistema. 
+
+\begin{multicols}{2}[Esempio:]
+\includegraphics[scale=0.5]{document_store_example_2}
+\newcolumn
+
+\begin{lstlisting}
+db.STUDENTI.aggregate([
+  { $lookup:
+	 { from: ESAMI,
+	   localField: _id,
+	   foreignField: stud_id,
+	   as: ``esami_fatti''
+	 }
+  }
+])
+\end{lstlisting}
+
+Si vuole, per esempio, incapsulare dentro a \color{blue}\textbf{STUDENTI} \color{black}i suoi esami. Non si generano le coppie, ma una \textbf{nuova propriet\`a} dentro \color{blue}\textbf{STUDENTI} \color{black}che conterr\`a tutte le istanze di \color{green}\textbf{ESAMI} \color{black} che si agganciano a quello studente.\\Risultato:
+
+\begin{lstlisting}
+{ _id: ``VR00010'',
+ nome: ``Mario'',
+ cognome: ``Rossi'',
+ ``esami_fatti'': [
+ 	{_id: ``01'', stud_id: ``VR00010'',
+ 	 ins_id: ``ins01'', voto: 22, 
+ 	 data: ``1/7/2016'' },
+   {_id: ``02'', stud_id: ``VR00010'', 
+    ins_id: ``ins02'', voto: 26, 
+    data: ``5/7/2015'' } ]
+}
+\end{lstlisting}
+
+
+\end{multicols}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
