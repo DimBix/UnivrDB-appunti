@@ -501,17 +501,90 @@ FERMATA(\underline{Treno, Staz}, Orario)}
 \`E possibile eliminare il quantificatore esistenziale nell'esempio $Q_5$, perch\'e non \`e negato. In altre parole, questa interrogazione \`e possibile farla in \emph{algebra relazionale} utilizzando due join. Alternativa:
 
 \[ Q_5: \{\text{\texttt{Numero, Categoria}}:t.(\text{\texttt{Num, Cat}})| t(\text{\texttt{TRENO}}), f_1(\text{\texttt{FERMATA}}), f_2(\text{\texttt{FERMATA}})| \]
-\[ t.\text{\texttt{Num}} = f_1.\text{\texttt{Treno}}\wedge f_1.\text{\texttt{Staz='Vicenza'}\\} \wedge t.\text{\texttt{Num}} = f_2.\text{\texttt{Treno}} \wedge f_2.\text{\texttt{Staz='Padova'}} \wedge f_2.\text{\texttt{Orario > 20:30}}\} \]
+\[ t.\text{\texttt{Num}} = f_1.\text{\texttt{Treno}}\wedge f_1.\text{\texttt{Staz='Vicenza'}} \wedge t.\text{\texttt{Num}} = f_2.\text{\texttt{Treno}} \wedge f_2.\text{\texttt{Staz='Padova'}} \wedge f_2.\text{\texttt{Orario > 20:30}}\} \]
+
+\subsection{Esercizi}
+Schema:\\
+\texttt{TRENO(\underline{Num}, Cat, Part, Arr, Dest)\\
+FERMATA(\underline{Treno, Staz}, Orario)}
+
+
+\paragraph{Q\textsubscript{6}: Trovare per ogni stazione il numero dell'ultimo treno che ferma in quella stazione.}
+
+\[ Q_6: \{f.(\text{\texttt{Treno, Staz}})| f(\text{\texttt{FERMATA}}) | \neg\exists g(\text{\texttt{FERMATA}}) (g.\text{\texttt{Staz}} = f.\text{\texttt{Staz}}\wedge g.\text{\texttt{Orario}} > f.\text{\texttt{Orario}} )\]
+
+Che equivale all'espressione con il quantificatore universale $\forall$:
+
+
+\[ Q_6: \{f.(\text{\texttt{Treno, Staz}})| f(\text{\texttt{FERMATA}}) | \forall g(\text{\texttt{FERMATA}}) (g.\text{\texttt{Staz}} = f.\text{\texttt{Staz}}\Rightarrow g.\text{\texttt{Orario}} \le f.\text{\texttt{Orario}} )\]
 
 
 
+\paragraph{Q\textsubscript{7}: Trovare l'elenco di tutte le stazioni dove fermano tutti i treni con destinazione Venezia SL.}
 
 
+\[ Q_7: \{f.(\text{\texttt{Staz}})| f(\text{\texttt{FERMATA}}) | \forall t(\text{\texttt{TRENO}}) (t.\text{\texttt{Dest='Venezia SL'}} \Rightarrow \exists g(FERMATA)(t.\text{\texttt{Num}} = g.\text{\texttt{Treno}} \wedge f.\text{\texttt{Staz}} = g.\text{\texttt{Staz}} ))\]
+
+In questo caso non \`e possibile in alcun modo eliminare il quantificatore universale.
+
+\paragraph{Q\textsubscript{8}: Trovare per ogni treno regionale il treno freccia rossa immediatamente successivo con la stessa de
+stinazione, riportando nel risultato il numero e l'orario di partenza dei due treni insieme alla loro destinazione.}
 
 
+\[ Q_8: \{\text{\texttt{Num\_REG, Part\_REG}} : t.(\text{\texttt{Num, Part}}),\text{\texttt{Num\_FR, Part\_FR}} : p.(\text{\texttt{Num, Part}}) | t(\text{\texttt{TRENO}}), p(\text{\texttt{TRENO}}) |\]
+\[ t.\text{\texttt{Cat='REG'}} \wedge p.\text{\texttt{Cat='FR'}} \wedge t.\text{\texttt{Dest}} = p.\text{\texttt{Dest}} \wedge t.\text{\texttt{Part}} < p.\text{\texttt{Part}} \wedge \neg\exists q(\text{\texttt{TRENO}})(t.\text{\texttt{Dest}} = q.\text{\texttt{Dest}} \wedge q.\text{\texttt{Cat='FR'}} \wedge \]
+\[t.\text{\texttt{Part}} < q.\text{\texttt{Part}} \wedge q.\text{\texttt{Part}} < p.\text{\texttt{Part}} )\]
+Possiamo scrivere questa interrogazione in Algebra:
+\begin{center}
+\begin{tikzpicture}
+\node at (3,7) [above][red] {$r_1$};
+\draw (3,6.5) -- (3,7);
+\node at (3,6) [above] {$\Large \bowtie_{Q}$};
+% Ramo sinistro
+\draw (2.7,6) -- (1,4.5);
+\node at (1,4) [above] {$\Pi_{\text{\texttt{Num, Part, Dest}}}$};
+\draw (1,4) -- (1,3);
+\node at (1, 2.5) [above] {$\sigma_{\texttt{Cat='REG'}}$};
+\draw (1,2.5) -- (1,1);
+\node at (1,1) [below] {\texttt{TRENO}};
+% Ramo destro
+\draw (3.3,6) -- (5,4.5);
+\node at (5,4) [above] {$\rho_{x \to x'}$};
+\draw (5,4) -- (5,3.5);
+\node at (5,3) [above] {$\Pi_{\texttt{Num, Part, Dest}}$};
+\draw (5,3) -- (5,2.2);
+\node at (5,1.8) [above] {$\sigma_{\texttt{Cat='FR'}}$};
+\draw (5,1.8) -- (5,1);
+\node at (5,1) [below] {\texttt{TRENO}};
+\node at (6, 0.5) [below] {$Q$: \texttt{Dest = Dest' $\wedge$ Part < Part'}}; 
 
+% Differenza
 
+\node at (8,6.5) [above] {$\Large -$};
+% Ramo sinistro
+\draw (7.7,6.6) -- (6.5,6);
+\node at (6.5,6) [below][red] {$r_1$};
+% Ramo destro
+\draw (8.3, 6.6) -- (10.5, 6);
+\node at (11.5, 5.5) [above] {$\Pi_{\texttt{Num, Part, Dest, Num', Part', Dest'}}$};
+\draw (10.5,5.5) -- (10.5,5);
+\node at (10.5, 4.5) [above] {$\Large \bowtie_{P}$};
+% Ramo sinistro
+\draw (9,4) -- (10.2, 4.5);
+\node at (9,4) [below][red] {$r_1$};
 
+% Ramo destro
+\draw (10.8, 4.5) -- (12, 4);
+\node at (12, 3.5) [above] {$\rho_{x \to x''}$};
+\draw (12,3.5) -- (12, 3);
+\node at (12,2.5) [above] {$\Pi_{\texttt{Num, Part, Dest}}$};
+\draw (12, 2.5) -- (12, 2);
+\node at (12, 1.5) [above] {$\sigma_{\texttt{Cat ='FR'}}$};
+\draw (12,1.5) -- (12,1);
+\node at (12, 1) [below] {\texttt{TRENO}};
+\node at (6, 0) [below] {$P$: \texttt{Dest = Dest'' $\wedge$ Part < Part'' $\wedge$ Part'' < Part'}};
+\end{tikzpicture}
+\end{center}
 
 
 
